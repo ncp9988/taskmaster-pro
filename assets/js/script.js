@@ -3,10 +3,12 @@ var tasks = {};
 var createTask = function(taskText, taskDate, taskList) {
   // create elements that make up a task item
   var taskLi = $("<li>").addClass("list-group-item");
-
-  var taskSpan = $("<span>").addClass("badge badge-primary badge-pill").text(taskDate);
-
-  var taskP = $("<p>").addClass("m-1").text(taskText);
+  var taskSpan = $("<span>")
+    .addClass("badge badge-primary badge-pill")
+    .text(taskDate);
+  var taskP = $("<p>")
+    .addClass("m-1")
+    .text(taskText);
 
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
@@ -18,7 +20,7 @@ var createTask = function(taskText, taskDate, taskList) {
   $("#list-" + taskList).append(taskLi);
 };
 
-var loadTasks = function () {
+var loadTasks = function() {
   tasks = JSON.parse(localStorage.getItem("tasks"));
 
   // if nothing in localStorage, create a new object to track all task status arrays
@@ -32,25 +34,31 @@ var loadTasks = function () {
   }
 
   // loop over object properties
-  $.each(tasks, function (list, arr) {
-    console.log(list, arr);
+  $.each(tasks, function(list, arr) {
     // then loop over sub-array
-    arr.forEach(function (task) {
+    arr.forEach(function(task) {
       createTask(task.text, task.date, list);
     });
   });
 };
 
-var saveTasks = function () {
+var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
 var auditTask = function(taskEl) {
+  console.log(taskEl)
   // get date from task element
-  var date = $(taskEl).find("span").text().trim();
+  var date = $(taskEl)
+    .find("span")
+    .text()
+    .trim();
+
+  console.log(date);
 
   // convert to moment object at 5:00pm
   var time = moment(date, "L").set("hour", 17);
+
   console.log(time);
 
   // remove any old classes from element
@@ -65,7 +73,6 @@ var auditTask = function(taskEl) {
   }
 };
 
-
 // enable draggable/sortable feature on list-group elements
 $(".card .list-group").sortable({
   // enable dragging across lists
@@ -74,16 +81,20 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event, ui) {
-    console.log(ui);
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
   },
   deactivate: function(event, ui) {
-    console.log(ui);
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function(event) {
     console.log(event);
+    $(event.target).addClass("dropover-active")
   },
   out: function(event) {
     console.log(event);
+    $(event.target).removeClass("dropover-active")
   },
   update: function() {
     var tempArr = [];
@@ -281,3 +292,9 @@ $("#remove-tasks").on("click", function() {
 
 // load tasks for the first time
 loadTasks();
+
+setInterval(function () {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, 18000);
